@@ -5,8 +5,10 @@ import { PageWrapper } from "./styles";
 import { AppDispatch, RootState } from "../store/store";
 import { useSelector } from "react-redux/es/hooks/useSelector";
 import { fetchData, usersActions } from "../store/usersSlice";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { number } from "yargs";
+import { link } from "fs";
+import { User } from "./types";
 
 export const Home = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -14,11 +16,23 @@ export const Home = () => {
     (state: RootState) => state.ui.isVisibleLiveSearching
   );
   const numberOfUsers = useRef<HTMLInputElement>(null);
-  let isFirst = false;
+  const prefixToFilter = useRef<HTMLInputElement>(null);
+  const isFetched = useSelector((state: RootState) => state.users.isFetched);
+  const users1 = useSelector((state: RootState) => state.users.users);
+  const [usersToFilter, setUsersToFilter] = useState(users1);
   function changeHandler() {
-    if (!isFirst) {
+    if (!isFetched) {
       dispatch(fetchData(+numberOfUsers.current!.value));
-      isFirst = true;
+      dispatch(usersActions.setFetched());
+      console.log("In fetch");
+    } else {
+      setUsersToFilter(
+        users1.filter((user: User) =>
+          user.name.first
+            .toLowerCase()
+            .startsWith(prefixToFilter.current!.value.toLowerCase())
+        )
+      );
     }
   }
   return (
@@ -39,9 +53,26 @@ export const Home = () => {
       {isVisible && (
         <div>
           <p>Introduce-ti numele persoanei</p>
-          <Input type="text" onChange={changeHandler} />
+          <Input type="text" onChange={changeHandler} ref={prefixToFilter} />
         </div>
       )}
+      {isFetched && (
+        <ul>
+          {usersToFilter.map((user: User, index) => (
+            <li key={user.name.first + "" + user.name.last}>
+              {user.name.first + user.name.last}
+            </li>
+          ))}
+        </ul>
+      )}
+      <button
+        onClick={() => {
+          // console.log(users1);
+          console.log(users1.length);
+        }}
+      >
+        Test
+      </button>
       {/* Slideshow should be rendered here */}
     </PageWrapper>
   );

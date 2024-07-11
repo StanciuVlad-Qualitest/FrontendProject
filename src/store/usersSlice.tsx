@@ -1,30 +1,37 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { func } from "prop-types";
 import { number } from "yargs";
+import { User } from "../pages/types";
 
 interface usersState {
-  users: any;
-  isFetching: boolean;
+  users: any[];
+  isFetched: boolean;
 }
 
 const initialState: usersState = {
   users: [],
-  isFetching: false,
+  isFetched: false,
 };
 
 const usersSlice = createSlice({
   name: "users",
   initialState,
   reducers: {
-    replaceUsers(state, action: PayloadAction<any>) {
+    replaceUsers(state, action: PayloadAction<any[]>) {
       state.users = action.payload;
-      state.isFetching = true;
+    },
+    setFetched(state) {
+      state.isFetched = true;
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchData.fulfilled, (state, action) => {
-      usersActions.replaceUsers(action);
-    });
+    builder.addCase(
+      fetchData.fulfilled,
+      (state, action: PayloadAction<any[]>) => {
+        state.users = action.payload;
+        state.isFetched = true;
+      }
+    );
   },
 });
 
@@ -36,8 +43,8 @@ export const fetchData = createAsyncThunk(
     );
     const usersData = await response.json();
     console.log("fetching...");
-    console.log(usersData);
-    return usersData;
+    console.log(usersData.results);
+    return usersData.results;
   }
 );
 
