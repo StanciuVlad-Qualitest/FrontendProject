@@ -31,6 +31,7 @@ export const Home = () => {
   const numberOfUsers = useRef<HTMLInputElement>(null);
   const prefixToFilter = useRef<HTMLInputElement>(null);
   const isFetched = useSelector((state: RootState) => state.users.isFetched);
+  const isFetching = useSelector((state: RootState) => state.users.isFetching);
 
   const users = useSelector((state: RootState) => state.users.users);
   const [usersToFilter, setUsersToFilter] = useState<User[]>(users);
@@ -63,6 +64,8 @@ export const Home = () => {
     if (!isVisible) {
       dispatch(uiActions.toggle());
     }
+    // dispatch(fetchData(+numberOfUsers.current!.value));
+    // dispatch(usersActions.setFetched());
   }
   return (
     <PageWrapper>
@@ -77,6 +80,7 @@ export const Home = () => {
         </div>
       )}
       <ScrollableList>
+        {isFetching && <p>Fetching...</p>}
         {usersToFilter.map((user: User, index) => (
           <ListItem key={user.name.first + user.name.last}>
             {user.name.first + " " + user.name.last}
