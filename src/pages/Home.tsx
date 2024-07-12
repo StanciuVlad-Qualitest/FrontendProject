@@ -9,6 +9,8 @@ import { useRef, useState } from "react";
 import { number } from "yargs";
 import { link } from "fs";
 import { User } from "./types";
+import { UserCard } from "../components/UserCard/UserCard";
+import { SlideShow } from "../components/SlideShow/SlideShow";
 
 export const Home = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -18,8 +20,9 @@ export const Home = () => {
   const numberOfUsers = useRef<HTMLInputElement>(null);
   const prefixToFilter = useRef<HTMLInputElement>(null);
   const isFetched = useSelector((state: RootState) => state.users.isFetched);
+
   const users1 = useSelector((state: RootState) => state.users.users);
-  const [usersToFilter, setUsersToFilter] = useState(users1);
+  const [usersToFilter, setUsersToFilter] = useState<User[]>([]);
   function changeHandler() {
     if (!isFetched) {
       dispatch(fetchData(+numberOfUsers.current!.value));
@@ -35,11 +38,16 @@ export const Home = () => {
       );
     }
   }
+  function handlerNumbeInput() {
+    if (!isVisible) {
+      dispatch(uiActions.toggle());
+    }
+  }
   return (
     <PageWrapper>
       <div>
         <p>Introduce-ti numarul de persoane</p>
-        <Input ref={numberOfUsers} type="number" />
+        <Input ref={numberOfUsers} type="number" onChange={handlerNumbeInput} />
         <button onClick={() => dispatch(uiActions.toggle())}>
           Show SearchBar
         </button>
@@ -57,22 +65,15 @@ export const Home = () => {
         </div>
       )}
       {isFetched && (
-        <ul>
+        <ol>
           {usersToFilter.map((user: User, index) => (
-            <li key={user.name.first + "" + user.name.last}>
-              {user.name.first + user.name.last}
+            <li key={user.name.first + user.name.last}>
+              {user.name.first + " " + user.name.last}
             </li>
           ))}
-        </ul>
+        </ol>
       )}
-      <button
-        onClick={() => {
-          // console.log(users1);
-          console.log(users1.length);
-        }}
-      >
-        Test
-      </button>
+      {isFetched && <SlideShow users={users1} />}
       {/* Slideshow should be rendered here */}
     </PageWrapper>
   );
