@@ -6,12 +6,23 @@ import { AppDispatch, RootState } from "../store/store";
 import { useSelector } from "react-redux/es/hooks/useSelector";
 import { fetchData, usersActions } from "../store/usersSlice";
 import { useRef, useState } from "react";
-import { number } from "yargs";
-import { link } from "fs";
 import { User } from "./types";
-import { UserCard } from "../components/UserCard/UserCard";
 import { SlideShow } from "../components/SlideShow/SlideShow";
+import { useEffect } from "react";
+import styled from "styled-components";
+const ScrollableList = styled.ul`
+  width: 1000px;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid green;
+  padding: 10px;
+  margin: 0;
+`;
 
+const ListItem = styled.li`
+  padding: 5px;
+  border-bottom: 1px solid red;
+`;
 export const Home = () => {
   const dispatch = useDispatch<AppDispatch>();
   const isVisible = useSelector(
@@ -21,23 +32,33 @@ export const Home = () => {
   const prefixToFilter = useRef<HTMLInputElement>(null);
   const isFetched = useSelector((state: RootState) => state.users.isFetched);
 
-  const users1 = useSelector((state: RootState) => state.users.users);
-  const [usersToFilter, setUsersToFilter] = useState<User[]>([]);
+  const users = useSelector((state: RootState) => state.users.users);
+  const [usersToFilter, setUsersToFilter] = useState<User[]>(users);
   function changeHandler() {
     if (!isFetched) {
       dispatch(fetchData(+numberOfUsers.current!.value));
       dispatch(usersActions.setFetched());
-      console.log("In fetch");
     } else {
       setUsersToFilter(
-        users1.filter((user: User) =>
+        users.filter((user) =>
           user.name.first
             .toLowerCase()
-            .startsWith(prefixToFilter.current!.value.toLowerCase())
+            .startsWith(prefixToFilter.current?.value.toLowerCase() || "")
         )
       );
     }
   }
+  useEffect(() => {
+    if (isFetched) {
+      setUsersToFilter(
+        users.filter((user) =>
+          user.name.first
+            .toLowerCase()
+            .startsWith(prefixToFilter.current?.value.toLowerCase() || "")
+        )
+      );
+    }
+  }, [isFetched, users]);
   function handlerNumbeInput() {
     if (!isVisible) {
       dispatch(uiActions.toggle());
@@ -48,15 +69,6 @@ export const Home = () => {
       <div>
         <p>Introduce-ti numarul de persoane</p>
         <Input ref={numberOfUsers} type="number" onChange={handlerNumbeInput} />
-        <button onClick={() => dispatch(uiActions.toggle())}>
-          Show SearchBar
-        </button>
-
-        <button
-          onClick={() => dispatch(fetchData(+numberOfUsers.current!.value))}
-        >
-          Start fetch!
-        </button>
       </div>
       {isVisible && (
         <div>
@@ -64,17 +76,15 @@ export const Home = () => {
           <Input type="text" onChange={changeHandler} ref={prefixToFilter} />
         </div>
       )}
-      {isFetched && (
-        <ol>
-          {usersToFilter.map((user: User, index) => (
-            <li key={user.name.first + user.name.last}>
-              {user.name.first + " " + user.name.last}
-            </li>
-          ))}
-        </ol>
-      )}
-      {isFetched && <SlideShow users={users1} />}
-      {/* Slideshow should be rendered here */}
+      <ScrollableList>
+        {usersToFilter.map((user: User, index) => (
+          <ListItem key={user.name.first + user.name.last}>
+            {user.name.first + " " + user.name.last}
+          </ListItem>
+        ))}
+      </ScrollableList>
+
+      {isFetched && <SlideShow users={users} />}
     </PageWrapper>
   );
 };

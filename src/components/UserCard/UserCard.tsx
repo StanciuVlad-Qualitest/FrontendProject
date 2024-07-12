@@ -8,7 +8,7 @@ interface Props {
 
 export const UserCard: FC<Props> = (props) => (
   <div>
-    <img src={props.image} alt="Photo of a person" />
+    <img src={props.image} alt="Person's userCard" />
     <p>
       {props.firstName} {props.lastName}
     </p>

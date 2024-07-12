@@ -1,10 +1,18 @@
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { FC, useRef, useState } from "react";
 import { UserCard } from "../UserCard/UserCard";
 import { User } from "../../pages/types";
-
+import { Button } from "../Button/Button";
+import styled from "styled-components";
 interface Props {
   users: User[];
 }
+
+const CenteredContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
 
 export const SlideShow: FC<Props> = (props: Props) => {
   const [userIndexToShow, setUserIndexToShow] = useState(0);
@@ -19,17 +27,12 @@ export const SlideShow: FC<Props> = (props: Props) => {
   const handleStop = () => {
     if (timer.current) {
       clearInterval(timer.current);
-      timer.current = undefined; // Reset the timer reference
+      timer.current = undefined;
     }
   };
 
-  useEffect(() => {
-    handleStart();
-    return () => handleStop(); // Clean up on unmount
-  }, [props.users]);
-
   return (
-    <div>
+    <CenteredContainer>
       {props.users.length > 0 && (
         <UserCard
           image={props.users[userIndexToShow].picture.large}
@@ -37,9 +40,17 @@ export const SlideShow: FC<Props> = (props: Props) => {
           firstName={props.users[userIndexToShow].name.first}
         />
       )}
-      <button onClick={handleStart}>Start</button>
-      <button onClick={handleStop}>Stop</button>
-    </div>
+      <Button
+        ariaLabel="Start slideshow"
+        onClick={handleStart}
+        variant="primary"
+      >
+        Start
+      </Button>
+      <Button ariaLabel="Stop slideshow" onClick={handleStop} variant="primary">
+        Stop
+      </Button>
+    </CenteredContainer>
   );
 };
 
