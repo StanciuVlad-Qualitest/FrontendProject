@@ -32,7 +32,7 @@ export const Home = () => {
   const prefixToFilter = useRef<HTMLInputElement>(null);
   const isFetched = useSelector((state: RootState) => state.users.isFetched);
   const isFetching = useSelector((state: RootState) => state.users.isFetching);
-
+  const hasError = useSelector((state: RootState) => state.users.error);
   const users = useSelector((state: RootState) => state.users.users);
   const [usersToFilter, setUsersToFilter] = useState<User[]>(users);
   function changeHandler() {
@@ -79,14 +79,17 @@ export const Home = () => {
           <Input type="text" onChange={changeHandler} ref={prefixToFilter} />
         </div>
       )}
-      <ScrollableList>
-        {isFetching && <p>Fetching...</p>}
-        {usersToFilter.map((user: User, index) => (
-          <ListItem key={user.name.first + user.name.last}>
-            {user.name.first + " " + user.name.last}
-          </ListItem>
-        ))}
-      </ScrollableList>
+      {!hasError && (
+        <ScrollableList>
+          {isFetching && <p>Fetching...</p>}
+          {usersToFilter.map((user: User, index) => (
+            <ListItem key={user.name.first + user.name.last}>
+              {user.name.first + " " + user.name.last}
+            </ListItem>
+          ))}
+        </ScrollableList>
+      )}
+      {hasError && <p>{hasError}</p>}
 
       {isFetched && <SlideShow users={users} />}
     </PageWrapper>
